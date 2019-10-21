@@ -4,7 +4,7 @@
 from discord.ext import commands
 import discord
 import config
-from helper import get_uid
+from osuapi import APIWrapper, get_username, get_mapset_ids
 
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
@@ -18,7 +18,7 @@ class RenBot(commands.Bot):
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
 
-
+APIHandler = APIWrapper(config.osu_token)
 bot = RenBot()
 
 # write general commands here
@@ -31,12 +31,14 @@ async def verify(ctx, user : discord.Member, profile_url):
     if not profile_url:
         await ctx.send("Please provide osu! profile link!")
         return
-    uid = await get_uid(profile_url)
-    # TODO: Specific user welcome
-    if not uid:
+    
+    osuUser = await APIWrapper(get_username(profile_url))
+    
+    if not osuUser:
         await ctx.send("Cannot find any user with that url, are you restricted?")
         return
-    await ctx.send("Welcome!")
+
+    await ctx.send(f"Welcome, {osuUser.username}!")
     return
 
 bot.run(config.token)
