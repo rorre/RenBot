@@ -4,6 +4,7 @@
 from discord.ext import commands
 import discord
 import config
+from helper import get_uid
 
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
@@ -28,8 +29,14 @@ async def verify(ctx, user : discord.Member, profile_url):
         await ctx.send("Please mention user!")
         return
     if not profile_url:
-        await ctx.send("Please provide valid osu! profile link!")
+        await ctx.send("Please provide osu! profile link!")
         return
-    
+    uid = await get_uid(profile_url)
+    # TODO: Specific user welcome
+    if not uid:
+        await ctx.send("Cannot find any user with that url, are you restricted?")
+        return
+    await ctx.send("Welcome!")
+    return
 
 bot.run(config.token)

@@ -1,6 +1,7 @@
 import re
 from typing import Tuple
 import aiohttp, urllib
+import config
 
 MAPSET_REGEX = r'http[s]?:\/\/osu.ppy.sh\/([b]?.*[s]?)\/([0-9]+)#[a-z]+\/([0-9]+)'
 USERS_REGEX = r'http[s]?:\/\/osu.ppy.sh\/u.*\/([0-9]*)'
@@ -47,6 +48,7 @@ def get_uid(msg : str) -> int:
     return result
 
 async def fetch_api(endpoint, **kwargs):
+    kwargs['k'] = config.osu_token
     extras = urllib.parse.urlencode(kwargs)
     async with aiohttp.ClientSession() as session:
         async with session.get(API_URL + endpoint + kwargs) as r:
