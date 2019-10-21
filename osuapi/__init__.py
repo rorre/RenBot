@@ -5,8 +5,8 @@ import aiohttp, urllib
 from .User import User
 from .Beatmap import Beatmap
 
-MAPSET_REGEX = r'http[s]?:\/\/osu.ppy.sh\/([b]?.*[s]?)\/([0-9]+)(?:#[a-z]+\/([0-9]+))?'
-USERS_REGEX = r'http[s]?:\/\/osu.ppy.sh\/u(?:sers)?\/(.*)[#|\/]'
+MAPSET_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/([b]?(?:eatmapset)?[s]?)\/([0-9]+)(?:#[a-z]+\/([0-9]+))?'
+USERS_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/u(?:sers)?\/([0-9]*[a-z]*[A-Z]*-*_*%*)'
 API_URL = "https://osu.ppy.sh/api/"
 
 class APIWrapper:
