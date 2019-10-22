@@ -20,9 +20,11 @@ lib64/
 parts/
 sdist/
 var/
+venv/
 *.egg-info/
 .installed.cfg
 *.egg
 
 # Our configuration files
 config.py
+sql.db
