@@ -61,11 +61,10 @@ async def request(ctx, map_url : str):
             await ctx.send("You have sent another request before: " + ongoing_reqs[0][2])
             return
     
-    hmm = await db.query(
+    await db.query(
         ["INSERT INTO requests (requester_uid, mapset_url) VALUES (?,?)",
         [ctx.author.id, map_url]]
     )
-    print(hmm)
     await ctx.send("Sent!")
 
 bot.run(config.token)
