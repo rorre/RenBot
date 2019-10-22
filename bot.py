@@ -43,7 +43,10 @@ async def verify(ctx, profile_url : str, *, user = None):
         return
 
     osuUser = osuUser[0]
+    guild_roles = ctx.guild.roles
+    verified_role = list(filter(lambda x: x.name == " Verified", guild_roles))[0]
     await ctx.send(f"Welcome, {osuUser.username}!")
+    await user.add_roles(verified_role)
     return
 
 bot.run(config.token)
