@@ -37,11 +37,12 @@ async def verify(ctx, profile_url : str, *, user = None):
         await ctx.send("Please provide osu! profile link!")
         return
     
-    osuUser = await APIWrapper(get_username(profile_url))
-    if not osuUser:
+    osuUser = await APIHandler.get_users(get_username(profile_url))
+.   if not osuUser:
         await ctx.send("Cannot find any user with that url, are you restricted?")
         return
 
+    osuUser = osuUser[0]
     await ctx.send(f"Welcome, {osuUser.username}!")
     return
 
