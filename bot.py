@@ -6,7 +6,7 @@ from typing import Optional
 import discord
 import config
 from osuapi import APIWrapper, get_username, get_mapset_ids
-from helpers import db
+from helpers import db, embeds
 
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
@@ -19,9 +19,18 @@ class RenBot(commands.Bot):
 
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
+        self.requests_channel = self.get_channel(config.requests_channel)
 
 APIHandler = APIWrapper(config.osu_token)
-bot = RenBot()
+bot = RenBot(owner_id=config.owner_id)
+
+def make_api_kwargs(regex_res):
+    kwargs = {}
+    if regex_res[0] in ['s', 'beatmapsets']:
+        kwargs['s'] = regex_res[1]
+    else:
+        kwargs['b'] = regex_res[1]
+    return kwargs
 
 # write general commands here
 
@@ -55,16 +64,48 @@ async def request(ctx, map_url : str):
         ["SELECT * FROM requests WHERE requester_uid=?", [ctx.author.id]]
     )
     
-    if previous_requests:
-        ongoing_reqs = list(filter(lambda x: not x[3], previous_requests))
+    is_owner = await bot.is_owner(ctx.author)
+
+    if previous_requests and not is_owner:
+        ongoing_reqs = list(filter(lambda x: int(x[6]) not in [3,4], previous_requests))
         if ongoing_reqs:
             await ctx.send("You have sent another request before: " + ongoing_reqs[0][2])
             return
-    
+
+    set_regex = get_mapset_ids(map_url)
+    kwargs = make_api_kwargs(set_regex)
+
+    request_embed = await embeds.generate_request_embed(**kwargs)
+    request_message = await bot.requests_channel.send(embed=request_embed)
     await db.query(
-        ["INSERT INTO requests (requester_uid, mapset_url) VALUES (?,?)",
-        [ctx.author.id, map_url]]
+        ["INSERT INTO requests (requester_uid, mapset_url, message_id) VALUES (?,?,?)",
+        [ctx.author.id, map_url, request_message.id]]
     )
+    dbid = await db.query("SELECT id FROM requests ORDER BY id DESC LIMIT 1;") # really inefficient aaaaa
+    await request_message.edit(content=f"ID: **{dbid[0][0]}**")
     await ctx.send("Sent!")
+
+@bot.command()
+@commands.is_owner()
+async def edit(ctx, request_id : int, is_accepted : bool, status : int, *, reason : str = ""):
+    sql_res = await db.query([
+        "SELECT * FROM requests WHERE id=?", [request_id]
+    ])
+    request = sql_res[0]
+    message = await ctx.fetch_message(int(request[5]))
+
+    set_regex = get_mapset_ids(request[2])
+    kwargs = make_api_kwargs(set_regex)
+
+    status_embed = await embeds.generate_status_embed(status, reason=reason, **kwargs)
+    await message.edit(embed=status_embed)
+
+    sql_query = """ UPDATE requests
+                    SET accepted = ?,
+                        reason = ?,
+                        status = ?
+                    WHERE id = ?
+                    """
+    await db.query([sql_query, [is_accepted, reason, status, request_id]])
 
 bot.run(config.token)

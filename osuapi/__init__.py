@@ -13,13 +13,13 @@ class APIWrapper:
     def __init__(self, osu_token):
         self.osu_token = osu_token
 
-    async def get_users(self, uid : Union[int, str]) -> User:
+    async def get_users(self, uid : Union[int, str]) -> List[User]:
         api_res = await self.fetch_api('get_user', u=str(uid))
         return [User(res) for res in api_res]
 
-    async def get_beatmaps(self, set_id : int) -> List[Beatmap]:
-        api_res = await self.fetch_api('get_beatmaps', s=set_id)
-        return api_res
+    async def get_beatmaps(self, **kwargs) -> List[Beatmap]:
+        api_res = await self.fetch_api('get_beatmaps', **kwargs)
+        return [Beatmap(map) for map in api_res]
 
     async def fetch_api(self, endpoint, **kwargs):
         kwargs['k'] = self.osu_token

@@ -9,7 +9,7 @@ async def query(q):
             cursor = await db.execute(q[0], q[1])
         async_res = await cursor.fetchall()
         await db.commit()
-        return tuple(async_res)
+        return async_res
 
 def initialize_db():
     db = sqlite3.connect(config.database_name)
@@ -18,7 +18,9 @@ def initialize_db():
         requester_uid integer NOT NULL,
         mapset_url text NOT NULL,
         accepted integer,
-        reason text
+        reason text,
+        message_id integer,
+        status integer
     ); """)
     db.commit()
     db.close()
