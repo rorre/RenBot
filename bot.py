@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from discord.ext import commands
+import sys
+import traceback
 from typing import Optional
+
 import discord
+from discord.ext import commands
+
 import config
-from osuapi import APIWrapper, get_username, get_mapset_ids, make_api_kwargs
 from helpers import db, embeds
-import sys, traceback
+from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
+
 
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
@@ -16,7 +20,8 @@ class RenBot(commands.Bot):
             try:
                 self.load_extension(cog)
             except Exception as exc:
-                print('Could not load extension {0} due to {1.__class__.__name__}: {1}'.format(cog, exc))
+                print('Could not load extension {0} due to {1.__class__.__name__}: {1}'.format(
+                    cog, exc))
 
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
@@ -25,15 +30,18 @@ class RenBot(commands.Bot):
 
     async def on_command_error(self, ctx, error):
         await ctx.send("An exception has occured.")
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr)
+
 
 APIHandler = APIWrapper(config.osu_token)
 bot = RenBot(owner_id=config.owner_id)
 
 # write general commands here
 
+
 @bot.command(aliases=["v", "verif"])
-async def verify(ctx, profile_url : str, *, user = None):
+async def verify(ctx, profile_url: str, *, user=None):
     if not user:
         user = ctx.author
 
@@ -44,7 +52,7 @@ async def verify(ctx, profile_url : str, *, user = None):
     if not profile_url:
         await ctx.send("Please provide osu! profile link!")
         return
-    
+
     username = get_username(profile_url)
     if not username:
         await ctx.send("Um... I cannot find username/id from your url, are you sure its correct?")
@@ -65,16 +73,18 @@ async def verify(ctx, profile_url : str, *, user = None):
     await ctx.send(f"Welcome, {osuUser.username}!")
     await user.add_roles(verified_role)
 
+
 @bot.command(aliases=["r", "req"])
-async def request(ctx, map_url : str):
+async def request(ctx, map_url: str):
     previous_requests = await db.query(
         ["SELECT * FROM requests WHERE requester_uid=?", [ctx.author.id]]
     )
-    
+
     is_owner = await bot.is_owner(ctx.author)
 
     if previous_requests and not is_owner:
-        ongoing_reqs = list(filter(lambda x: int(x[6]) not in [3,4], previous_requests))
+        ongoing_reqs = list(filter(lambda x: int(
+            x[6]) not in [3, 4], previous_requests))
         if ongoing_reqs:
             await ctx.send("You have sent another request before: " + ongoing_reqs[0][2])
             return
@@ -84,7 +94,7 @@ async def request(ctx, map_url : str):
     if not set_regex:
         await ctx.send("Please send valid beatmap!")
         return
-    
+
     kwargs = make_api_kwargs(set_regex)
 
     request_embed = await embeds.generate_request_embed(**kwargs)
@@ -108,8 +118,9 @@ async def request(ctx, map_url : str):
         ]
     ])
 
-    dbid = await db.query("SELECT id FROM requests ORDER BY id DESC LIMIT 1;") # really inefficient aaaaa
+    # really inefficient aaaaa
+    dbid = await db.query("SELECT id FROM requests ORDER BY id DESC LIMIT 1;")
     for message in request_messages:
         await message.edit(content=f"ID: **{dbid[0][0]}**")
-    
+
     await ctx.send("Sent!")

@@ -1,19 +1,22 @@
 import re
-from typing import Tuple, Union, List
-import aiohttp, urllib
+import urllib
+from typing import List, Tuple, Union
 
-from .User import User
+import aiohttp
+
 from .Beatmap import Beatmap
+from .User import User
 
 MAPSET_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/([b]?(?:eatmapset)?[s]?)\/([0-9]+)(?:#[a-z]+\/([0-9]+))?'
 USERS_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/u(?:sers)?\/([0-9]*[a-z]*[A-Z]*-*_*%*)'
 API_URL = "https://osu.ppy.sh/api/"
 
+
 class APIWrapper:
     def __init__(self, osu_token):
         self.osu_token = osu_token
 
-    async def get_users(self, uid : Union[int, str]) -> List[User]:
+    async def get_users(self, uid: Union[int, str]) -> List[User]:
         api_res = await self.fetch_api('get_user', u=str(uid))
         return [User(res) for res in api_res]
 
@@ -31,16 +34,18 @@ class APIWrapper:
                     return js
                 return None
 
+
 """ Public helper functions """
 
-def get_mapset_ids(msg : str) -> Tuple:
+
+def get_mapset_ids(msg: str) -> Tuple:
     """Get mapset URL from message and extract id
-    
+
     Parameters
     ----------
     msg : str
         Message to check
-    
+
     Returns
     -------
     tuple of str
@@ -51,14 +56,15 @@ def get_mapset_ids(msg : str) -> Tuple:
         return None
     return result.groups()
 
-def get_username(msg : str) -> str:
+
+def get_username(msg: str) -> str:
     """Get osu! user id from message
-    
+
     Parameters
     ----------
     msg : str
         Message to check
-    
+
     Returns
     -------
     int
@@ -72,6 +78,7 @@ def get_username(msg : str) -> str:
         return None
     result = result_groups[0]
     return result
+
 
 def make_api_kwargs(regex_res):
     kwargs = {}

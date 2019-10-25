@@ -1,5 +1,7 @@
-import aiosqlite, sqlite3
+import sqlite3
+import aiosqlite
 import config
+
 
 async def query(q):
     async with aiosqlite.connect(config.database_name) as db:
@@ -10,6 +12,7 @@ async def query(q):
         async_res = await cursor.fetchall()
         await db.commit()
         return async_res
+
 
 def initialize_db():
     db = sqlite3.connect(config.database_name)

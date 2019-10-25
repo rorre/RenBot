@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from discord.ext import commands
-from typing import Optional
-import discord
-import config
-from osuapi import APIWrapper, get_username, get_mapset_ids, make_api_kwargs
-from helpers import db, embeds
 import asyncio
+from typing import Optional
+
+import discord
+from discord.ext import commands
+
+import config
+from helpers import db, embeds
+from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
+
 
 class OwnerCommands(commands.Cog):
     """The description for OwnerCommands goes here."""
 
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         self.requests_channel = self.bot.get_channel(config.requests_channel)
@@ -21,7 +24,7 @@ class OwnerCommands(commands.Cog):
         self.rejected_channel = self.bot.get_channel(config.rejected_channel)
         self.pending_channel = self.bot.get_channel(config.pending_channel)
 
-    async def update_mid(self, req_id, mid : list):
+    async def update_mid(self, req_id, mid: list):
         sql_query = """ UPDATE requests
                         SET message_id = ?
                         WHERE id = ?
@@ -35,7 +38,7 @@ class OwnerCommands(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def edit(self, ctx, request_id : int, is_accepted : bool, status : int, *, reason : str = ""):
+    async def edit(self, ctx, request_id: int, is_accepted: bool, status: int, *, reason: str = ""):
         sql_res = await db.query([
             "SELECT * FROM requests WHERE id=?", [request_id]
         ])
@@ -65,7 +68,7 @@ class OwnerCommands(commands.Cog):
         kwargs = make_api_kwargs(set_regex)
 
         status_embed = await embeds.generate_status_embed(status, reason=reason, **kwargs)
-        
+
         await messages[0].edit(embed=status_embed)
         if channel_cases[current_status] != channel_cases[status]:
             await messages[1].delete()
@@ -89,22 +92,23 @@ class OwnerCommands(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def accept(self, ctx, request_id : int):
+    async def accept(self, ctx, request_id: int):
         msg = await self.edit.callback(self, ctx, request_id, 1, 1)
         accepted_msg = await self.accepted_channel.send(embed=msg.embeds[0])
         await self.update_mid(request_id, [msg.id, accepted_msg.id])
 
     @commands.command()
     @commands.is_owner()
-    async def reject(self, ctx, request_id : int, *, reason : str):
+    async def reject(self, ctx, request_id: int, *, reason: str):
         msg = await self.edit.callback(self, ctx, request_id, 0, 4, reason=reason)
         rejected_message = await self.rejected_channel.send(embed=msg.embeds[0])
         await self.update_mid(request_id, [msg.id, rejected_message.id])
-    
+
     @commands.command()
     @commands.is_owner()
-    async def edit_status(self, ctx, request_id : int, status : int):
+    async def edit_status(self, ctx, request_id: int, status: int):
         await self.edit.callback(self, ctx, request_id, 1, status)
+
 
 def setup(bot):
     bot.add_cog(OwnerCommands(bot))
