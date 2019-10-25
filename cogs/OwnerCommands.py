@@ -39,6 +39,11 @@ class OwnerCommands(commands.Cog):
         sql_res = await db.query([
             "SELECT * FROM requests WHERE id=?", [request_id]
         ])
+
+        if not sql_res:
+            await ctx.send("Cannot find that request.")
+            return
+
         request = sql_res[0]
 
         request_mid = list(map(int, request[5].split(',')))
@@ -62,10 +67,10 @@ class OwnerCommands(commands.Cog):
         status_embed = await embeds.generate_status_embed(status, reason=reason, **kwargs)
         
         await messages[0].edit(embed=status_embed)
-        if current_status != status:
+        if channel_cases[current_status] != channel_cases[status]:
             await messages[1].delete()
         else:
-            messages[1].edit(embed=status_embed)
+            await messages[1].edit(embed=status_embed)
 
         sql_query = """ UPDATE requests
                         SET accepted = ?,

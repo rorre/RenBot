@@ -7,6 +7,7 @@ import discord
 import config
 from osuapi import APIWrapper, get_username, get_mapset_ids, make_api_kwargs
 from helpers import db, embeds
+import sys
 
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
@@ -21,6 +22,10 @@ class RenBot(commands.Bot):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
         self.requests_channel = self.get_channel(config.requests_channel)
         self.pending_channel = self.get_channel(config.pending_channel)
+
+    async def on_command_error(self, ctx, e):
+        await ctx.send("An exception has occured.")
+        print(e, file=sys.stderr)
 
 APIHandler = APIWrapper(config.osu_token)
 bot = RenBot(owner_id=config.owner_id)
@@ -40,7 +45,12 @@ async def verify(ctx, profile_url : str, *, user = None):
         await ctx.send("Please provide osu! profile link!")
         return
     
-    osuUser = await APIHandler.get_users(get_username(profile_url))
+    username = get_username(profile_url)
+    if not username:
+        await ctx.send("Um... I cannot find username/id from your url, are you sure its correct?")
+        return
+
+    osuUser = await APIHandler.get_users(username)
     if not osuUser:
         await ctx.send("Cannot find any user with that url, are you restricted?")
         return
@@ -66,9 +76,19 @@ async def request(ctx, map_url : str):
             return
 
     set_regex = get_mapset_ids(map_url)
+
+    if not set_regex:
+        await ctx.send("Please send valid beatmap!")
+        return
+    
     kwargs = make_api_kwargs(set_regex)
 
     request_embed = await embeds.generate_request_embed(**kwargs)
+
+    if not request_embed:
+        await ctx.send("Cannot find mapset from osu! API")
+        return
+
     request_messages = [
         await bot.requests_channel.send(embed=request_embed),
         await bot.pending_channel.send(embed=request_embed)

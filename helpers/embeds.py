@@ -12,6 +12,8 @@ STAT_DICT = {
 
 async def generate_request_embed(**kwargs):
     beatmapset = await APIHandler.get_beatmaps(**kwargs)
+    if not beatmapset:
+        return None
     beatmap = beatmapset[0]
     embed = discord.Embed(title="**Mod Request**")
 
@@ -26,6 +28,8 @@ async def generate_request_embed(**kwargs):
 
 async def generate_status_embed(status, reason="", **kwargs):
     beatmapset = await APIHandler.get_beatmaps(**kwargs)
+    if not beatmapset:
+        return None
     beatmap = beatmapset[0]
     embed = discord.Embed(title="**Mod Status**")
 
