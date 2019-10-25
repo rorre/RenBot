@@ -7,7 +7,7 @@ import discord
 import config
 from osuapi import APIWrapper, get_username, get_mapset_ids, make_api_kwargs
 from helpers import db, embeds
-import sys
+import sys, traceback
 
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
@@ -23,9 +23,9 @@ class RenBot(commands.Bot):
         self.requests_channel = self.get_channel(config.requests_channel)
         self.pending_channel = self.get_channel(config.pending_channel)
 
-    async def on_command_error(self, ctx, e):
+    async def on_command_error(self, ctx, error):
         await ctx.send("An exception has occured.")
-        print(e, file=sys.stderr)
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
 APIHandler = APIWrapper(config.osu_token)
 bot = RenBot(owner_id=config.owner_id)
@@ -57,7 +57,11 @@ async def verify(ctx, profile_url : str, *, user = None):
 
     osuUser = osuUser[0]
     guild_roles = ctx.guild.roles
-    verified_role = list(filter(lambda x: x.name == " Verified", guild_roles))[0]
+    verified_role = list(filter(lambda x: x.name == "Verified", guild_roles))
+    if not verified_role:
+        await ctx.send("Cannot find Verified role, ping admin please.")
+        return
+    verified_role = verified_role[0]
     await ctx.send(f"Welcome, {osuUser.username}!")
     await user.add_roles(verified_role)
 
