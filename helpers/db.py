@@ -19,7 +19,7 @@ def initialize_db():
         mapset_url text NOT NULL,
         accepted integer,
         reason text,
-        message_id integer,
+        message_id text,
         status integer
     ); """)
     db.commit()

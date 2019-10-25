@@ -72,3 +72,11 @@ def get_username(msg : str) -> str:
         return None
     result = result_groups[0]
     return result
+
+def make_api_kwargs(regex_res):
+    kwargs = {}
+    if regex_res[0] in ['s', 'beatmapsets']:
+        kwargs['s'] = regex_res[1]
+    else:
+        kwargs['b'] = regex_res[1]
+    return kwargs
