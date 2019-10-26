@@ -10,6 +10,8 @@ import config
 from helpers import db, embeds
 from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 
+def check_channel(ctx):
+    return ctx.message.channel.id == config.modreqs_channel
 
 class OwnerCommands(commands.Cog):
     """Owner only commands."""
@@ -129,6 +131,7 @@ class OwnerCommands(commands.Cog):
 
     @commands.command(aliases=["r", "req"])
     @commands.guild_only()
+    @commands.check(check_channel)
     async def request(self, ctx, map_url: str):
         """Requests a mod
         
