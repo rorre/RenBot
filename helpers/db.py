@@ -25,5 +25,9 @@ def initialize_db():
         message_id text,
         status integer
     ); """)
+    db.execute("""CREATE TABLE users (
+        uid integer NOT NULL UNIQUE,
+        osu_uid integer NOT NULL UNIQUE
+    );""")
     db.commit()
     db.close()

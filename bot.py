@@ -3,6 +3,7 @@
 
 import sys
 import traceback
+import sqlite3
 from typing import Optional
 
 import discord
@@ -45,6 +46,12 @@ class RenBot(commands.Bot):
     async def on_member_join(self, member):
         await self.arrival_channel.send(f"Welcome, {member.mention}! Please verify yourself by sending `r!v <your osu! profile url`")
 
+    async def on_member_remove(self, member):
+        await self.arrival_channel.send(f"Bye, {member.display_name}!")
+        await db.query([
+            "DELETE FROM users WHERE uid = ?", [member.id]
+        ])
+
 APIHandler = APIWrapper(config.osu_token)
 bot = RenBot(owner_id=config.owner_id)
 
@@ -84,6 +91,16 @@ async def verify(ctx, profile_url: str, *, user=None):
     if not verified_role:
         await ctx.send("Cannot find Verified role, ping admin please.")
         return
+
+    try:
+        await db.query([
+            "INSERT into users (uid, osu_uid) VALUES(?,?);",
+            [user.id, osuUser.user_id]
+        ])
+    except sqlite3.IntegrityError:
+        await ctx.send("Somebody else have used that username.")
+        return
+    
     verified_role = verified_role[0]
     await ctx.send(f"Welcome, {osuUser.username}!")
     await user.add_roles(verified_role)
