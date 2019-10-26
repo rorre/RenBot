@@ -29,7 +29,15 @@ class RenBot(commands.Bot):
         self.pending_channel = self.get_channel(config.pending_channel)
 
     async def on_command_error(self, ctx, error):
-        await ctx.send("An exception has occured.")
+        ignored = (commands.CommandNotFound, commands.UserInputError)
+        error = getattr(error, 'original', error)
+
+        if isinstance(error, ignored):
+            return
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Missing required argument: " + error.param.name)
+
+        await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr)
 
@@ -65,7 +73,7 @@ async def verify(ctx, profile_url: str, *, user=None):
 
     osuUser = osuUser[0]
     guild_roles = ctx.guild.roles
-    verified_role = list(filter(lambda x: x.name.lower() == "verified", guild_roles))
+    verified_role = list(filter(lambda x: x.name.lower() == "v  erified", guild_roles))
     if not verified_role:
         await ctx.send("Cannot find Verified role, ping admin please.")
         return
