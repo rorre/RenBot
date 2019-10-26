@@ -49,6 +49,9 @@ class UsersManager(commands.Cog):
         - There is one optional parameter, it is target user."""
         if not user:
             user = ctx.author
+        else:
+            if not await self.bot.is_owner(ctx.author):
+                return ctx.send("Only owner could do that.")
 
         if not isinstance(user, discord.Member):
             await ctx.send("Please send valid member as second argument!")
