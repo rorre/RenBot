@@ -120,7 +120,6 @@ async def request(ctx, map_url: str):
 
     # really inefficient aaaaa
     dbid = await db.query("SELECT id FROM requests ORDER BY id DESC LIMIT 1;")
-    for message in request_messages:
-        await message.edit(content=f"ID: **{dbid[0][0]}**")
+    await message[0].edit(content=f"ID: **{dbid[0][0]}**")
 
     await ctx.send("Sent!")
