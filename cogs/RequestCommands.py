@@ -106,7 +106,7 @@ class OwnerCommands(commands.Cog):
     @commands.is_owner()
     @commands.guild_only()
     async def accept(self, ctx, request_id: int):
-        "Accepts a request."
+        "Accepts a request. | Owner only"
         msg = await self.edit.callback(self, ctx, request_id, 1, 1)
         accepted_msg = await self.accepted_channel.send(embed=msg.embeds[0])
         await self.update_mid(request_id, [msg.id, accepted_msg.id])
@@ -115,7 +115,7 @@ class OwnerCommands(commands.Cog):
     @commands.is_owner()
     @commands.guild_only()
     async def reject(self, ctx, request_id: int, *, reason: str):
-        "Rejects a request."
+        "Rejects a request. | Owner only"
         msg = await self.edit.callback(self, ctx, request_id, 0, 4, reason=reason)
         rejected_message = await self.rejected_channel.send(embed=msg.embeds[0])
         await self.update_mid(request_id, [msg.id, rejected_message.id])
@@ -124,8 +124,63 @@ class OwnerCommands(commands.Cog):
     @commands.is_owner()
     @commands.guild_only()
     async def edit_status(self, ctx, request_id: int, status: int):
-        "Edits request status."
+        "Edits request status. | Owner only"
         await self.edit.callback(self, ctx, request_id, 1, status)
+
+    @commands.command(aliases=["r", "req"])
+    @commands.guild_only()
+    async def request(self, ctx, map_url: str):
+        """Requests a mod
+        
+        - If the user already have ongoing request, it will be rejected."""
+        previous_requests = await db.query(
+            ["SELECT * FROM requests WHERE requester_uid=?", [ctx.author.id]]
+        )
+
+        is_owner = await self.bot.is_owner(ctx.author)
+
+        if previous_requests and not is_owner:
+            ongoing_reqs = list(filter(lambda x: int(
+                x[6]) not in [3, 4], previous_requests))
+            if ongoing_reqs:
+                await ctx.send("You have sent another request before: " + ongoing_reqs[0][2])
+                return
+
+        set_regex = get_mapset_ids(map_url)
+
+        if not set_regex:
+            await ctx.send("Please send valid beatmap!")
+            return
+
+        kwargs = make_api_kwargs(set_regex)
+
+        request_embed = await embeds.generate_request_embed(**kwargs)
+
+        if not request_embed:
+            await ctx.send("Cannot find mapset from osu! API")
+            return
+
+        request_messages = [
+            await self.bot.requests_channel.send(embed=request_embed),
+            await self.bot.pending_channel.send(embed=request_embed)
+        ]
+
+        await db.query([
+            "INSERT INTO requests (requester_uid, mapset_url, message_id, status) VALUES (?,?,?,?)",
+            [
+                ctx.author.id,
+                map_url,
+                ','.join(map(lambda x: str(x.id), request_messages)),
+                0
+            ]
+        ])
+
+        # really inefficient aaaaa
+        dbid = await db.query("SELECT id FROM requests ORDER BY id DESC LIMIT 1;")
+        await request_messages[0].edit(content=f"ID: **{dbid[0][0]}**")
+
+        await ctx.send("Sent!")
+
 
 
 def setup(bot):
