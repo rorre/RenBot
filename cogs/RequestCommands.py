@@ -133,6 +133,7 @@ class OwnerCommands(commands.Cog):
         """Requests a mod
         
         - If the user already have ongoing request, it will be rejected."""
+        print(f"[request] Querying database to see if {ctx.author.name} has ongoing request")
         previous_requests = await db.query(
             ["SELECT * FROM requests WHERE requester_uid=?", [ctx.author.id]]
         )
@@ -146,6 +147,7 @@ class OwnerCommands(commands.Cog):
                 await ctx.send("You have sent another request before: " + ongoing_reqs[0][2])
                 return
 
+        print(f"[request] Getting osu!map url")
         set_regex = get_mapset_ids(map_url)
 
         if not set_regex:
@@ -154,17 +156,20 @@ class OwnerCommands(commands.Cog):
 
         kwargs = make_api_kwargs(set_regex)
 
+        print("[request] Generating embed")
         request_embed = await embeds.generate_request_embed(**kwargs)
 
         if not request_embed:
             await ctx.send("Cannot find mapset from osu! API")
             return
 
+        print("[request] Posting embeds")
         request_messages = [
             await self.bot.requests_channel.send(embed=request_embed),
             await self.bot.pending_channel.send(embed=request_embed)
         ]
 
+        print("[request] Querying database for map")
         await db.query([
             "INSERT INTO requests (requester_uid, mapset_url, message_id, status) VALUES (?,?,?,?)",
             [

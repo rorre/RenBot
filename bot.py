@@ -49,10 +49,13 @@ class RenBot(commands.Bot):
         return await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
 
     async def on_member_join(self, member):
+        print(f'[on_member_join] {member.name} joined.')
         await self.arrival_channel.send(f"Welcome, {member.mention}! Please verify yourself by sending `r!v <your osu! profile url`")
 
     async def on_member_remove(self, member):
+        print(f'[on_member_join] {member.name} left.')
         await self.arrival_channel.send(f"Bye, {member.display_name}!")
+        print(f'[on_member_join] Removing {member.name} from database.')
         await db.query([
             "DELETE FROM users WHERE uid = ?", [member.id]
         ])

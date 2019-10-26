@@ -29,13 +29,18 @@ class UsersManager(commands.Cog):
 
     @tasks.loop(hours=2)
     async def username_checker(self):
+        print("[username_checker] START")
+        print("[username_checker] querying database")
         users = await db.query("SELECT * FROM users")
         for u in users:
+            print("[username_checker] Gathering user:", u[0])
             member = await self.guild.fetch_member(u[0])
+            print("[username_checker] Gathering osu! profile for:", member.name)
             osuUser = await APIHandler.get_users(u[1])
             if not osuUser:
                 continue
             osuUser = osuUser[0]
+            print("[username_checker] Renaming to:", osuUser.username)
             await member.edit(nick=osuUser.username)
             await asyncio.sleep(10)
             
@@ -61,11 +66,13 @@ class UsersManager(commands.Cog):
             await ctx.send("Please provide osu! profile link!")
             return
 
+        print("[verify] Getting username from url")
         username = get_username(profile_url)
         if not username:
             await ctx.send("Um... I cannot find username/id from your url, are you sure its correct?")
             return
 
+        print("[verify] Getting user from osu! API")
         osuUser = await APIHandler.get_users(username)
         if not osuUser:
             await ctx.send("Cannot find any user with that url, are you restricted?")
@@ -78,6 +85,7 @@ class UsersManager(commands.Cog):
             await ctx.send("Cannot find Verified role, ping admin please.")
             return
 
+        print(f"[verify] Inputting user {osuUser.user_id} to database")
         try:
             await db.query([
                 "INSERT into users (uid, osu_uid) VALUES(?,?);",
