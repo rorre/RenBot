@@ -43,7 +43,11 @@ class UsersManager(commands.Cog):
             print("[username_checker] Renaming to:", osuUser.username)
             await member.edit(nick=osuUser.username)
             await asyncio.sleep(10)
-            
+    
+    @username_checker.before_loop
+    async def before_checks(self):
+        print('[username_checker] Waiting for bot to be ready')
+        await self.bot.wait_until_ready()
 
     @commands.command(aliases=["v", "verif"])
     @commands.guild_only()
