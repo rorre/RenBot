@@ -27,6 +27,7 @@ class RenBot(commands.Bot):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
         self.requests_channel = self.get_channel(config.requests_channel)
         self.pending_channel = self.get_channel(config.pending_channel)
+        self.arrival_channel = self.get_channel(config.arrival_channel)
 
     async def on_command_error(self, ctx, error):
         ignored = (commands.CommandNotFound)
@@ -41,6 +42,8 @@ class RenBot(commands.Bot):
             type(error), error, error.__traceback__, file=sys.stderr)
         return await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
 
+    async def on_member_join(self, member):
+        await self.arrival_channel.send(f"Welcome, {member.mention}! Please verify yourself by sending `r!v <your osu! profile url`")
 
 APIHandler = APIWrapper(config.osu_token)
 bot = RenBot(owner_id=config.owner_id)
@@ -77,7 +80,7 @@ async def verify(ctx, profile_url: str, *, user=None):
 
     osuUser = osuUser[0]
     guild_roles = ctx.guild.roles
-    verified_role = list(filter(lambda x: x.name.lower() == "v  erified", guild_roles))
+    verified_role = list(filter(lambda x: x.name.lower() == "verified", guild_roles))
     if not verified_role:
         await ctx.send("Cannot find Verified role, ping admin please.")
         return
