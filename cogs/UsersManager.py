@@ -106,6 +106,7 @@ class UsersManager(commands.Cog):
         verified_role = verified_role[0]
         await ctx.send(f"Welcome, {osuUser.username}!")
         await user.add_roles(verified_role)
+        await user.edit(nick=osuUser.username)
 
 
 def setup(bot):
