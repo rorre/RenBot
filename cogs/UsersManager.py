@@ -15,6 +15,9 @@ from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 
 APIHandler = APIWrapper(config.osu_token)
 
+def check_channel(ctx):
+    ctx.message.channel.id == config.arrival_channel
+
 class UsersManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -51,6 +54,7 @@ class UsersManager(commands.Cog):
 
     @commands.command(aliases=["v", "verif"])
     @commands.guild_only()
+    @commands.check(check_channel)
     async def verify(self, ctx, profile_url: str, *, user=None):
         """Verifies a user
         
@@ -96,7 +100,7 @@ class UsersManager(commands.Cog):
                 [user.id, osuUser.user_id]
             ])
         except sqlite3.IntegrityError:
-            await ctx.send("Somebody else have used that username.")
+            await ctx.send("Somebody else have used that username. (or you're already verified)")
             return
         
         verified_role = verified_role[0]
