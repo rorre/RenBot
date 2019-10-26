@@ -12,7 +12,8 @@ from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 
 
 class OwnerCommands(commands.Cog):
-    """The description for OwnerCommands goes here."""
+    """Owner only commands."""
+    qualified_name = "Owner"
 
     def __init__(self, bot):
         self.bot = bot
@@ -25,7 +26,7 @@ class OwnerCommands(commands.Cog):
         self.pending_channel = self.bot.get_channel(config.pending_channel)
 
     async def update_mid(self, req_id, mid: list):
-        sql_query = """ UPDATE requests
+        sql_query = """ UPDATE requests 
                         SET message_id = ?
                         WHERE id = ?
                         """
@@ -39,6 +40,16 @@ class OwnerCommands(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def edit(self, ctx, request_id: int, is_accepted: bool, status: int, *, reason: str = ""):
+        """Edits request object.
+        
+        - First parameter should be is_accepted's value, could be 0 or 1.
+        - Second parameter should be an integer
+        - Status are considered with these maps:
+            1: Accepted
+            2: Modding
+            3: Done
+            4: Rejected
+        - If status is 4, then reasoning should be provided."""
         sql_res = await db.query([
             "SELECT * FROM requests WHERE id=?", [request_id]
         ])
@@ -93,6 +104,7 @@ class OwnerCommands(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def accept(self, ctx, request_id: int):
+        "Accepts a request."
         msg = await self.edit.callback(self, ctx, request_id, 1, 1)
         accepted_msg = await self.accepted_channel.send(embed=msg.embeds[0])
         await self.update_mid(request_id, [msg.id, accepted_msg.id])
@@ -100,6 +112,7 @@ class OwnerCommands(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def reject(self, ctx, request_id: int, *, reason: str):
+        "Rejects a request."
         msg = await self.edit.callback(self, ctx, request_id, 0, 4, reason=reason)
         rejected_message = await self.rejected_channel.send(embed=msg.embeds[0])
         await self.update_mid(request_id, [msg.id, rejected_message.id])
@@ -107,6 +120,7 @@ class OwnerCommands(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def edit_status(self, ctx, request_id: int, status: int):
+        "Edits request status."
         await self.edit.callback(self, ctx, request_id, 1, status)
 
 

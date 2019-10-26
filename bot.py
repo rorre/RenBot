@@ -51,6 +51,10 @@ bot = RenBot(owner_id=config.owner_id)
 
 @bot.command(aliases=["v", "verif"])
 async def verify(ctx, profile_url: str, *, user=None):
+    """Verifies a user
+    
+    - The only parameter is profile url.
+    - There is one optional parameter, it is target user."""
     if not user:
         user = ctx.author
 
@@ -85,6 +89,9 @@ async def verify(ctx, profile_url: str, *, user=None):
 
 @bot.command(aliases=["r", "req"])
 async def request(ctx, map_url: str):
+    """Requests a mod
+    
+    - If the user already have ongoing request, it will be rejected."""
     previous_requests = await db.query(
         ["SELECT * FROM requests WHERE requester_uid=?", [ctx.author.id]]
     )
