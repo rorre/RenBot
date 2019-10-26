@@ -65,7 +65,7 @@ async def verify(ctx, profile_url: str, *, user=None):
 
     osuUser = osuUser[0]
     guild_roles = ctx.guild.roles
-    verified_role = list(filter(lambda x: x.name == "Verified", guild_roles))
+    verified_role = list(filter(lambda x: x.name.lower() == "verified", guild_roles))
     if not verified_role:
         await ctx.send("Cannot find Verified role, ping admin please.")
         return
