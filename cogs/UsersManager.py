@@ -16,7 +16,7 @@ from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 APIHandler = APIWrapper(config.osu_token)
 
 def check_channel(ctx):
-    ctx.message.channel.id == config.arrival_channel
+    return ctx.message.channel.id == config.arrival_channel
 
 class UsersManager(commands.Cog):
     def __init__(self, bot):
