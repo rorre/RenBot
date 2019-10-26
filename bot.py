@@ -59,6 +59,7 @@ bot = RenBot(owner_id=config.owner_id)
 
 
 @bot.command(aliases=["v", "verif"])
+@commands.guild_only()
 async def verify(ctx, profile_url: str, *, user=None):
     """Verifies a user
     
@@ -107,6 +108,7 @@ async def verify(ctx, profile_url: str, *, user=None):
 
 
 @bot.command(aliases=["r", "req"])
+@commands.guild_only()
 async def request(ctx, map_url: str):
     """Requests a mod
     

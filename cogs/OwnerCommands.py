@@ -39,6 +39,7 @@ class OwnerCommands(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.guild_only()
     async def edit(self, ctx, request_id: int, is_accepted: bool, status: int, *, reason: str = ""):
         """Edits request object.
         
@@ -103,6 +104,7 @@ class OwnerCommands(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.guild_only()
     async def accept(self, ctx, request_id: int):
         "Accepts a request."
         msg = await self.edit.callback(self, ctx, request_id, 1, 1)
@@ -111,6 +113,7 @@ class OwnerCommands(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.guild_only()
     async def reject(self, ctx, request_id: int, *, reason: str):
         "Rejects a request."
         msg = await self.edit.callback(self, ctx, request_id, 0, 4, reason=reason)
@@ -119,6 +122,7 @@ class OwnerCommands(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.guild_only()
     async def edit_status(self, ctx, request_id: int, status: int):
         "Edits request status."
         await self.edit.callback(self, ctx, request_id, 1, status)
