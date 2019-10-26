@@ -36,7 +36,7 @@ class RenBot(commands.Bot):
         self.arrival_channel = self.get_channel(config.arrival_channel)
 
     async def on_command_error(self, ctx, error):
-        ignored = (commands.CommandNotFound)
+        ignored = (commands.CommandNotFound, commands.CheckFailure)
         error = getattr(error, 'original', error)
 
         if isinstance(error, ignored):
