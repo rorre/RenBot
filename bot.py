@@ -68,7 +68,7 @@ async def verify(ctx, profile_url: str, *, user=None):
         user = ctx.author
 
     if not isinstance(user, discord.Member):
-        ctx.send("Please send valid member as second argument!")
+        await ctx.send("Please send valid member as second argument!")
         return
 
     if not profile_url:
