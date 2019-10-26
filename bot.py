@@ -35,12 +35,11 @@ class RenBot(commands.Bot):
         if isinstance(error, ignored):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("Missing required argument: " + error.param.name)
-            return
-
-        await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
+            return await ctx.send("Missing required argument: " + error.param.name)
+            
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr)
+        return await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
 
 
 APIHandler = APIWrapper(config.osu_token)
