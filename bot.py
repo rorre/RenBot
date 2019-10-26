@@ -29,13 +29,14 @@ class RenBot(commands.Bot):
         self.pending_channel = self.get_channel(config.pending_channel)
 
     async def on_command_error(self, ctx, error):
-        ignored = (commands.CommandNotFound, commands.UserInputError)
+        ignored = (commands.CommandNotFound)
         error = getattr(error, 'original', error)
 
         if isinstance(error, ignored):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Missing required argument: " + error.param.name)
+            return
 
         await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
         traceback.print_exception(
