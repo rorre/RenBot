@@ -8,7 +8,7 @@ from .Beatmap import Beatmap
 from .User import User
 
 MAPSET_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/([b]?(?:eatmapset)?[s]?)\/([0-9]+)(?:#[a-z]+\/([0-9]+))?'
-USERS_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/u(?:sers)?\/([-]?\w*[-]?)'
+USERS_REGEX = r'http[s]?:\/\/osu\.ppy\.sh\/u(?:sers)?\/([-\[\]\w]*)'
 API_URL = "https://osu.ppy.sh/api/"
 
 
