@@ -4,6 +4,7 @@
 import sys
 import traceback
 import sqlite3
+import subprocess
 from typing import Optional
 
 import discord
@@ -20,6 +21,7 @@ cogs = [
     'cogs.RoleManager'
 ]
 
+
 class RenBot(commands.Bot):
     def __init__(self, **kwargs):
         super().__init__(command_prefix=commands.when_mentioned_or('r!'), **kwargs)
@@ -35,6 +37,10 @@ class RenBot(commands.Bot):
         self.requests_channel = self.get_channel(config.requests_channel)
         self.pending_channel = self.get_channel(config.pending_channel)
         self.arrival_channel = self.get_channel(config.arrival_channel)
+        last_commit = subprocess.run(
+            ["git", "log", "-1", "--oneline"],
+            capture_output=True).stdout.decode().strip()
+        self.get_channel(config.bot_channel).send(f"Running! Last commit: `{last_commit}`")
 
     async def on_command_error(self, ctx, error):
         ignored = (commands.CommandNotFound, commands.CheckFailure)
@@ -44,7 +50,7 @@ class RenBot(commands.Bot):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
             return await ctx.send("Missing required argument: " + error.param.name)
-            
+
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr)
         return await ctx.send("An exception has occured: `{}`".format(error.__class__.__name__))
@@ -60,5 +66,6 @@ class RenBot(commands.Bot):
         await db.query([
             "DELETE FROM users WHERE uid = ?", [member.id]
         ])
+
 
 bot = RenBot(owner_id=config.owner_id)
