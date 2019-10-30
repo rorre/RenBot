@@ -16,7 +16,8 @@ from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 cogs = [
     'cogs.BotManagement',
     'cogs.RequestCommands',
-    'cogs.UsersManager'
+    'cogs.UsersManager',
+    'cogs.RoleManager'
 ]
 
 class RenBot(commands.Bot):
