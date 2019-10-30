@@ -40,7 +40,7 @@ class RenBot(commands.Bot):
         last_commit = subprocess.run(
             ["git", "log", "-1", "--oneline"],
             capture_output=True).stdout.decode().strip()
-        self.get_channel(config.bot_channel).send(f"Running! Last commit: `{last_commit}`")
+        await self.get_channel(config.bot_channel).send(f"Running! Last commit: `{last_commit}`")
 
     async def on_command_error(self, ctx, error):
         ignored = (commands.CommandNotFound, commands.CheckFailure)
