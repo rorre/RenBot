@@ -110,7 +110,10 @@ class OwnerCommands(commands.Cog):
     async def accept(self, ctx, request_id: int):
         "Accepts a request. | Owner only"
         msg = await self.edit.callback(self, ctx, request_id, 1, 1)
-        accepted_msg = await self.accepted_channel.send(embed=msg.embeds[0])
+        accepted_msg = await self.accepted_channel.send(
+            msg.content,
+            embed=msg.embeds[0]
+        )
         await self.update_mid(request_id, [msg.id, accepted_msg.id])
 
     @commands.command()
@@ -119,7 +122,10 @@ class OwnerCommands(commands.Cog):
     async def reject(self, ctx, request_id: int, *, reason: str):
         "Rejects a request. | Owner only"
         msg = await self.edit.callback(self, ctx, request_id, 0, 4, reason=reason)
-        rejected_message = await self.rejected_channel.send(embed=msg.embeds[0])
+        rejected_message = await self.rejected_channel.send(
+            msg.content,
+            embed=msg.embeds[0]
+        )
         await self.update_mid(request_id, [msg.id, rejected_message.id])
 
     @commands.command()
@@ -185,7 +191,9 @@ class OwnerCommands(commands.Cog):
 
         # really inefficient aaaaa
         dbid = await db.query("SELECT id FROM requests ORDER BY id DESC LIMIT 1;")
-        await request_messages[0].edit(content=f"ID: **{dbid[0][0]}**")
+
+        for message in request_messages:
+            await message.edit(content=f"ID: **{dbid[0][0]}**\nMap URL: {map_url}")
 
         await ctx.send("Sent!")
 
