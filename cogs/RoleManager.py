@@ -37,6 +37,13 @@ class RoleManager(commands.Cog):
         await ctx.author.add_roles(self.allowed_roles_id[role_name])
         await ctx.send("Done!")
 
+    @role.command()
+    async def remove(self, ctx, role_name):
+        if role_name not in self.allowed_roles:
+            return await ctx.send("Invalid argument")
+        await ctx.author.remove_roles(self.allowed_roles_id[role_name])
+        await ctx.send("Done!")
+
 
 
 def setup(bot):
