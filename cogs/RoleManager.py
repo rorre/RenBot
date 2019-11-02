@@ -26,6 +26,9 @@ class RoleManager(commands.Cog):
     @commands.group()
     async def role(self, ctx, *, role_name):
         role_desc = self.allowed_roles.get(role_name, None)
+        if ctx.invoked_subcommand:
+            return
+        
         if not role_desc:
             return await ctx.send("Needs either role name, get or remove")
         await ctx.send(f"`{role_name}`: `{role_desc}`")
