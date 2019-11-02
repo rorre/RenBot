@@ -44,6 +44,17 @@ class RoleManager(commands.Cog):
         await ctx.author.remove_roles(self.allowed_roles_id[role_name])
         await ctx.send("Done!")
 
+    @role.command()
+    @commands.guild_only()
+    async def info(self, ctx, *, role_name):
+        role_desc = self.allowed_roles.get(role_name, None)
+        if ctx.invoked_subcommand:
+            return
+        
+        if not role_desc:
+            return await ctx.send("Needs either role name, get or remove")
+        await ctx.send(f"`{role_name}`: `{role_desc}`")
+
 
 
 def setup(bot):
