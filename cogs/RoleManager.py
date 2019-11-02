@@ -24,6 +24,7 @@ class RoleManager(commands.Cog):
         }
 
     @commands.group()
+    @commands.guild_only()
     async def role(self, ctx, *, role_name):
         role_desc = self.allowed_roles.get(role_name, None)
         if ctx.invoked_subcommand:
@@ -34,10 +35,19 @@ class RoleManager(commands.Cog):
         await ctx.send(f"`{role_name}`: `{role_desc}`")
     
     @role.command()
+    @commands.guild_only()
     async def get(self, ctx, role_name):
         if role_name not in self.allowed_roles:
             return await ctx.send("Invalid argument")
         await ctx.author.add_roles(self.allowed_roles_id[role_name])
+        await ctx.send("Done!")
+
+    @role.command()
+    @commands.guild_only()
+    async def remove(self, ctx, role_name):
+        if role_name not in self.allowed_roles:
+            return await ctx.send("Invalid argument")
+        await ctx.author.remove_roles(self.allowed_roles_id[role_name])
         await ctx.send("Done!")
 
 
