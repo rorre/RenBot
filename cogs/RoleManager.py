@@ -5,56 +5,49 @@ import discord
 import config
 
 class RoleManager(commands.Cog):
-    """The description for Rolemanager goes here."""
-
     def __init__(self, bot):
         self.bot = bot
-        self.allowed_roles = {
-            'lewd' : '#nsfw access',
-            'stream': 'live stream notification'
-        }
+        self.roles = config.roles
     
     @commands.Cog.listener()
     async def on_ready(self):
         self.guild = self.bot.get_guild(config.guild_id)
 
-        self.allowed_roles_id = {
-        'lewd' : self.guild.get_role(638256184708694026),
-        'stream' : self.guild.get_role(639078556902621184)
-        }
-
     @commands.group()
     @commands.guild_only()
     async def role(self, ctx):
-        pass
+        if not ctx.invoked_subcommand:
+            return await ctx.send("Please invoke a subcommand.")
     
     @role.command()
     @commands.guild_only()
     async def get(self, ctx, role_name):
-        if role_name not in self.allowed_roles:
+        if role_name not in self.roles:
             return await ctx.send("Invalid argument")
-        await ctx.author.add_roles(self.allowed_roles_id[role_name])
+        role = self.guild.get_role(self.roles[role_name][1])
+        if role in self.ctx.author.roles:
+            return await ctx.send("You already have that role.")
+        await ctx.author.add_roles(role)
         await ctx.send("Done!")
 
     @role.command()
     @commands.guild_only()
     async def remove(self, ctx, role_name):
-        if role_name not in self.allowed_roles:
+        if role_name not in self.roles:
             return await ctx.send("Invalid argument")
-        await ctx.author.remove_roles(self.allowed_roles_id[role_name])
+        role = self.guild.get_role(self.roles[role_name][1])
+        if role not in self.ctx.author.roles:
+            return await ctx.send("You don't have that role.")
+        await ctx.author.remove_roles(role)
         await ctx.send("Done!")
 
     @role.command()
     @commands.guild_only()
     async def info(self, ctx, *, role_name):
-        role_desc = self.allowed_roles.get(role_name, None)
-        if ctx.invoked_subcommand:
-            return
-        
-        if not role_desc:
-            return await ctx.send("Needs either role name, get or remove")
+        if role_name not in self.roles:
+            return await ctx.send("Invalid argument")
+        role_desc = self.roles[role_name][0]
         await ctx.send(f"`{role_name}`: `{role_desc}`")
-
 
 
 def setup(bot):

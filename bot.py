@@ -11,7 +11,7 @@ import discord
 from discord.ext import commands
 
 import config
-from helpers import db, embeds
+from helpers import db, embeds, restya
 from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 
 cogs = [
@@ -31,17 +31,16 @@ class RenBot(commands.Bot):
             except Exception as exc:
                 print('Could not load extension {0} due to {1.__class__.__name__}: {1}'.format(
                     cog, exc))
+        self.osu_client = APIWrapper(config.osu_token)
+        self.restya_client = restya.RestyaClient(loop=self.loop)
 
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
         self.requests_channel = self.get_channel(config.requests_channel)
         self.pending_channel = self.get_channel(config.pending_channel)
         self.arrival_channel = self.get_channel(config.arrival_channel)
-        last_commit = subprocess.run(
-            ["git", "log", "-1", "--oneline"],
-            capture_output=True).stdout.decode().strip()
-        await self.get_channel(config.bot_channel).send(f"Running! Last commit: `{last_commit}`")
-
+        await self.restya_client.login()
+        
     async def on_command_error(self, ctx, error):
         ignored = (commands.CommandNotFound, commands.CheckFailure)
         error = getattr(error, 'original', error)
@@ -57,7 +56,7 @@ class RenBot(commands.Bot):
 
     async def on_member_join(self, member):
         print(f'[on_member_join] {member.name} joined.')
-        await self.arrival_channel.send(f"Welcome, {member.mention}! Please verify yourself by sending `r!v <your osu! profile url`")
+        await self.arrival_channel.send(f"Welcome, {member.mention}! Please verify yourself by sending `r!v <your osu! profile url?>`")
 
     async def on_member_remove(self, member):
         print(f'[on_member_join] {member.name} left.')

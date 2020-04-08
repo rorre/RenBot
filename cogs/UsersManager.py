@@ -21,36 +21,10 @@ def check_channel(ctx):
 class UsersManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.username_checker.start()
     
     @commands.Cog.listener()
     async def on_ready(self):
         self.guild = self.bot.get_guild(config.guild_id)
-    
-    def cog_unload(self):
-        self.username_checker.cancel()
-
-    @tasks.loop(hours=2)
-    async def username_checker(self):
-        print("[username_checker] START")
-        print("[username_checker] querying database")
-        users = await db.query("SELECT * FROM users")
-        for u in users:
-            print("[username_checker] Gathering user:", u[0])
-            member = await self.guild.fetch_member(u[0])
-            print("[username_checker] Gathering osu! profile for:", member.name)
-            osuUser = await APIHandler.get_users(u[1])
-            if not osuUser:
-                continue
-            osuUser = osuUser[0]
-            print("[username_checker] Renaming to:", osuUser.username)
-            await member.edit(nick=osuUser.username)
-            await asyncio.sleep(10)
-    
-    @username_checker.before_loop
-    async def before_checks(self):
-        print('[username_checker] Waiting for bot to be ready')
-        await self.bot.wait_until_ready()
 
     @commands.command(aliases=["v", "verif"])
     @commands.guild_only()
