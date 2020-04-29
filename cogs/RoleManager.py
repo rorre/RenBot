@@ -36,7 +36,7 @@ class RoleManager(commands.Cog):
         if role_name not in self.roles:
             return await ctx.send("Invalid argument")
         role = self.guild.get_role(self.roles[role_name][1])
-        if role not in self.ctx.author.roles:
+        if role not in ctx.author.roles:
             return await ctx.send("You don't have that role.")
         await ctx.author.remove_roles(role)
         await ctx.send("Done!")
