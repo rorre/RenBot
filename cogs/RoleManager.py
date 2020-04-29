@@ -25,7 +25,7 @@ class RoleManager(commands.Cog):
         if role_name not in self.roles:
             return await ctx.send("Invalid argument")
         role = self.guild.get_role(self.roles[role_name][1])
-        if role in self.ctx.author.roles:
+        if role in ctx.author.roles:
             return await ctx.send("You already have that role.")
         await ctx.author.add_roles(role)
         await ctx.send("Done!")
