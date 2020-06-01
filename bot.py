@@ -16,9 +16,8 @@ from osuapi import APIWrapper, get_mapset_ids, get_username, make_api_kwargs
 
 cogs = [
     'cogs.BotManagement',
-    'cogs.RequestCommands',
     'cogs.UsersManager',
-    'cogs.RoleManager'
+    'cogs.OsuHelper'
 ]
 
 
@@ -39,7 +38,7 @@ class RenBot(commands.Bot):
         self.requests_channel = self.get_channel(config.requests_channel)
         self.pending_channel = self.get_channel(config.pending_channel)
         self.arrival_channel = self.get_channel(config.arrival_channel)
-        await self.restya_client.login()
+        #await self.restya_client.login()
         
     async def on_command_error(self, ctx, error):
         ignored = (commands.CommandNotFound, commands.CheckFailure)
